@@ -152,4 +152,4 @@ mvn clean
 
 ---
 
-*© 2024 PROYECTOCATEDRADWF - Desarrollo Web Frontend*
+*© 2025 PROYECTOCATEDRADWF - Desarrollo Web Frontend*

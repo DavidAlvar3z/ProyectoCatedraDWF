@@ -2,7 +2,6 @@ package sv.edu.udb.InvestigacionDwf.service.assembler;
 
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.stereotype.Component;
-import sv.edu.udb.InvestigacionDwf.controller.HistorialPedidoController;
 import sv.edu.udb.InvestigacionDwf.dto.response.HistorialPedidoResponse;
 import sv.edu.udb.InvestigacionDwf.model.entity.HistorialPedido;
 

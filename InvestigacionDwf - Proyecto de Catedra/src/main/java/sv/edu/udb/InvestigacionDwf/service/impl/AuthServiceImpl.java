@@ -16,6 +16,7 @@ import sv.edu.udb.InvestigacionDwf.model.entity.User;
 import sv.edu.udb.InvestigacionDwf.repository.RoleRepository;
 import sv.edu.udb.InvestigacionDwf.repository.UserRepository;
 import sv.edu.udb.InvestigacionDwf.security.jwt.JwtUtils;
+import sv.edu.udb.InvestigacionDwf.service.AuthService;
 
 import java.time.LocalDate;
 import java.util.Objects;

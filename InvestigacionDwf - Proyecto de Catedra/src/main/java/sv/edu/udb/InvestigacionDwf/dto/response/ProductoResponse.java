@@ -2,7 +2,6 @@ package sv.edu.udb.InvestigacionDwf.dto.response;
 
 import lombok.*;
 import org.springframework.hateoas.RepresentationModel;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 

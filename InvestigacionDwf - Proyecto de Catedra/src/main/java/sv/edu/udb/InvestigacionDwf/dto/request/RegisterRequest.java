@@ -4,11 +4,12 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.*;
+
+import java.time.LocalDate;
+
 import lombok.Data;
 import sv.edu.udb.InvestigacionDwf.controller.validation.Dui;
 import sv.edu.udb.InvestigacionDwf.controller.validation.PhoneNumber;
-
-import java.time.LocalDate;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)

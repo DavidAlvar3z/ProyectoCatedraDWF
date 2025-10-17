@@ -1,16 +1,20 @@
 // src/main/java/sv/edu/udb/InvestigacionDwf/model/entity/Pedido.java
 package sv.edu.udb.InvestigacionDwf.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import sv.edu.udb.InvestigacionDwf.model.enums.EstadoPedido;
+import sv.edu.udb.InvestigacionDwf.model.enums.TipoPago;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import lombok.*;
-import sv.edu.udb.InvestigacionDwf.model.enums.EstadoPedido;
-import sv.edu.udb.InvestigacionDwf.model.enums.TipoPago;
 
 @Data
 @NoArgsConstructor

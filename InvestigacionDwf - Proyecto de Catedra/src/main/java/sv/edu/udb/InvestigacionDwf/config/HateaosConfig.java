@@ -9,7 +9,7 @@ import sv.edu.udb.InvestigacionDwf.model.entity.Resena;
 import sv.edu.udb.InvestigacionDwf.model.entity.User;
 
 @Configuration
-public class HateoasConfig {
+public class HateaosConfig {
 
     @Bean
     public PagedResourcesAssembler<Pedido> pedidoPagedResourcesAssembler() {

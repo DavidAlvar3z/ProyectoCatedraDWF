@@ -7,9 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import sv.edu.udb.InvestigacionDwf.model.entity.Notificacion;
-import sv.edu.udb.InvestigacionDwf.model.entity.User;
-import sv.edu.udb.InvestigacionDwf.model.entity.Role;
 import sv.edu.udb.InvestigacionDwf.model.entity.Pedido;
+import sv.edu.udb.InvestigacionDwf.model.entity.Role;
+import sv.edu.udb.InvestigacionDwf.model.entity.User;
 import sv.edu.udb.InvestigacionDwf.model.enums.EstadoNotificacion;
 
 import java.math.BigDecimal;

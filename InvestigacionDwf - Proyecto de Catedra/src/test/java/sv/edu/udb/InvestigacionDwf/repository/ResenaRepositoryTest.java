@@ -7,11 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
-import sv.edu.udb.InvestigacionDwf.model.entity.Resena;
-import sv.edu.udb.InvestigacionDwf.model.entity.Producto;
-import sv.edu.udb.InvestigacionDwf.model.entity.User;
-import sv.edu.udb.InvestigacionDwf.model.entity.TipoProducto;
-import sv.edu.udb.InvestigacionDwf.model.entity.Role;
+import sv.edu.udb.InvestigacionDwf.model.entity.*;
 
 import java.math.BigDecimal;
 import java.util.List;

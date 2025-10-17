@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import sv.edu.udb.InvestigacionDwf.model.entity.HistorialPedido;
-import sv.edu.udb.InvestigacionDwf.model.enums.EstadoPedido;
 
 import java.util.List;
 import java.util.Optional;

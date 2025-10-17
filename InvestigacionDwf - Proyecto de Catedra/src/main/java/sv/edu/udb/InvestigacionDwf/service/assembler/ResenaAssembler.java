@@ -4,9 +4,11 @@ package sv.edu.udb.InvestigacionDwf.service.assembler;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.stereotype.Component;
+import sv.edu.udb.InvestigacionDwf.controller.ResenaController;
 import sv.edu.udb.InvestigacionDwf.dto.response.ResenaResponse;
 import sv.edu.udb.InvestigacionDwf.model.entity.Resena;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component

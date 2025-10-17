@@ -5,9 +5,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.stereotype.Component;
+import sv.edu.udb.InvestigacionDwf.controller.HistorialPuntosController;
 import sv.edu.udb.InvestigacionDwf.dto.response.HistorialPuntosResponse;
 import sv.edu.udb.InvestigacionDwf.model.entity.HistorialPuntos;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component

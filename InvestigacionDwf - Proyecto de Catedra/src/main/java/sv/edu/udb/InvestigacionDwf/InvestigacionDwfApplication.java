@@ -7,8 +7,8 @@ import org.springframework.hateoas.config.EnableHypermediaSupport;
 @EnableHypermediaSupport(type = EnableHypermediaSupport.HypermediaType.HAL)
 @SpringBootApplication
 public class InvestigacionDwfApplication {
-    public static void main(String[] args) {
-        SpringApplication.run(InvestigacionDwfApplication.class, args);
-    }
+	public static void main(String[] args) {
+		SpringApplication.run(InvestigacionDwfApplication.class, args);
+	}
 }
 

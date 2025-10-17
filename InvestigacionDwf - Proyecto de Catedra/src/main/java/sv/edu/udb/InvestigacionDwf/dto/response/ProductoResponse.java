@@ -1,4 +1,4 @@
-package sv.edu.udb.InvestigacionDwf.dto.request;
+package sv.edu.udb.InvestigacionDwf.dto.response;
 
 import lombok.*;
 import org.springframework.hateoas.RepresentationModel;

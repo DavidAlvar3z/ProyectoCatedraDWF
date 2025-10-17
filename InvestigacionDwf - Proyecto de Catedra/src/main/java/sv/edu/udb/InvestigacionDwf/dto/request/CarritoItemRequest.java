@@ -8,8 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.awt.geom.QuadCurve2D;
-
 // CarritoItemRequest.java
 @Data
 @NoArgsConstructor

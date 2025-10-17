@@ -7,7 +7,7 @@ import lombok.*;
 @Setter
 @AllArgsConstructor
 @Builder
-@NoArgsConstructor(access = lombok.AccessLevel.PUBLIC)
+@NoArgsConstructor(access = AccessLevel.PUBLIC)
 public class DireccionResponse {
     private Long idDireccion;
     private String alias;

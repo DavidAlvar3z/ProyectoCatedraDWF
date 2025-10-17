@@ -1,13 +1,11 @@
 package sv.edu.udb.InvestigacionDwf.dto.request;
 
-import java.math.BigDecimal;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-
 import lombok.*;
+
+import java.math.BigDecimal;
 
 @Getter
 @Setter

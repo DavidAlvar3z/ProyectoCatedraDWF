@@ -1,3 +1,5 @@
+import '../style/Checkout.css';
+
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { checkoutPedido } from '../services/pedidoService';

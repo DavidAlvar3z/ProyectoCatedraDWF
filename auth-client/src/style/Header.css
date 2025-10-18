@@ -1,58 +1,153 @@
+/* ============================================
+   HEADER.CSS - MODERN UPGRADE
+   ============================================ */
+
 .header {
   position: sticky;
   top: 0;
   z-index: 1000;
-  background-color: #111;
+  background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
   color: #fff;
   padding: 1rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 
+    0 4px 20px rgba(0, 0, 0, 0.4),
+    0 2px 10px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  animation: headerSlideDown 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes headerSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .header__brand a {
-  font-size: 1.5rem;
-  font-weight: bold;
+  font-size: 1.6rem;
+  font-weight: 800;
   color: #fff;
   text-decoration: none;
+  background: linear-gradient(135deg, #ffffff 0%, #a0aec0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  transition: all 0.3s ease;
+  position: relative;
+  letter-spacing: 0.5px;
+}
+
+.header__brand a::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #4299e1 0%, #9f7aea 100%);
+  transition: width 0.3s ease;
+}
+
+.header__brand a:hover::after {
+  width: 100%;
+}
+
+.header__brand a:hover {
+  transform: scale(1.05);
 }
 
 .header__nav {
   display: flex;
-  gap: 1rem;
+  gap: 1.5rem;
   align-items: center;
 }
 
 .header__user-actions {
   display: flex;
-  gap: 1rem;
+  gap: 1.2rem;
   align-items: center;
 }
 
 .header__logout-btn {
-  padding: 0.5rem 1rem;
-  background-color: #dc3545;
+  padding: 0.6rem 1.3rem;
+  background: linear-gradient(135deg, #fc8181 0%, #e53e3e 100%);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 600;
+  font-size: 0.95rem;
+  box-shadow: 0 2px 8px rgba(229, 62, 62, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.header__logout-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.5s, height 0.5s;
+}
+
+.header__logout-btn:hover::before {
+  width: 200px;
+  height: 200px;
 }
 
 .header__logout-btn:hover {
-  background-color: #a71d2a;
+  background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(229, 62, 62, 0.5);
+}
+
+.header__logout-btn:active {
+  transform: translateY(0);
 }
 
 .header__nav a {
-  color: white;
+  color: #cbd5e0;
   text-decoration: none;
   font-size: 1rem;
-  transition: color 0.3s ease;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  position: relative;
+  padding: 0.5rem 0;
+}
+
+.header__nav a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #4299e1 0%, #48bb78 100%);
+  transition: width 0.3s ease;
 }
 
 .header__nav a:hover {
-  color: #007bff;
+  color: #ffffff;
+  transform: translateY(-2px);
+}
+
+.header__nav a:hover::after {
+  width: 100%;
 }
 
 /* ============================= */
@@ -64,104 +159,220 @@
 }
 
 .notification-btn {
-  background: none;
-  border: none;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.1);
   cursor: pointer;
   position: relative;
   color: white;
+  padding: 0.6rem;
+  border-radius: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 1.3rem;
+}
+
+.notification-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1) rotate(15deg);
 }
 
 .notification-btn .badge {
   position: absolute;
-  top: -5px;
-  right: -5px;
-  background: red;
+  top: -6px;
+  right: -6px;
+  background: linear-gradient(135deg, #fc8181 0%, #e53e3e 100%);
   color: white;
   border-radius: 50%;
   font-size: 0.7rem;
-  padding: 2px 5px;
+  padding: 3px 6px;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(229, 62, 62, 0.5);
+  animation: badgePulse 2s ease-in-out infinite;
+  min-width: 20px;
+  text-align: center;
+}
+
+@keyframes badgePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
 }
 
 .notification-dropdown {
   position: absolute;
   right: 0;
-  top: 100%;
-  width: 280px;
-  background: white;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  border-radius: 4px;
+  top: calc(100% + 10px);
+  width: 320px;
+  background: linear-gradient(135deg, #ffffff 0%, #f7fafc 100%);
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.3),
+    0 4px 16px rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
   z-index: 100;
   padding-top: 0;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  animation: dropdownSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes dropdownSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .notif-tabs {
   display: flex;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 2px solid #e2e8f0;
+  background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
 }
 
 .notif-tabs button {
   flex: 1;
-  padding: 0.5rem;
+  padding: 0.8rem;
   background: none;
   border: none;
   cursor: pointer;
-  font-weight: bold;
-  transition: background 0.2s;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  color: #4a5568;
+  position: relative;
+}
+
+.notif-tabs button::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #4299e1 0%, #48bb78 100%);
+  transition: width 0.3s ease;
 }
 
 .notif-tabs button.active {
-  background: #f0f0f0;
+  background: linear-gradient(135deg, rgba(66, 153, 225, 0.1) 0%, rgba(72, 187, 120, 0.1) 100%);
+  color: #2d3748;
+}
+
+.notif-tabs button.active::after {
+  width: 100%;
+}
+
+.notif-tabs button:hover {
+  background: rgba(66, 153, 225, 0.05);
+  color: #2d3748;
 }
 
 .notif-list {
-  max-height: 260px;
+  max-height: 320px;
   overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e0 #f7fafc;
+}
+
+.notif-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.notif-list::-webkit-scrollbar-track {
+  background: #f7fafc;
+}
+
+.notif-list::-webkit-scrollbar-thumb {
+  background: #cbd5e0;
+  border-radius: 3px;
+}
+
+.notif-list::-webkit-scrollbar-thumb:hover {
+  background: #a0aec0;
 }
 
 .notif-item {
-  padding: 0.75rem;
-  border-bottom: 1px solid #eee;
+  padding: 1rem;
+  border-bottom: 1px solid #e2e8f0;
   cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.notif-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, #4299e1 0%, transparent 100%);
+  transition: width 0.3s ease;
+}
+
+.notif-item:hover::before {
+  width: 4px;
 }
 
 .notif-item.unread {
-  background: #fff !important;   
-  color: #111 !important;         
-  font-weight: bold;
+  background: linear-gradient(135deg, #ebf8ff 0%, #bee3f8 100%);
+  color: #1a202c;
+  font-weight: 600;
+  border-left: 3px solid #4299e1;
 }
 
-
 .notif-item.read {
-  background: #fff !important;
-  color: #666;
+  background: #ffffff;
+  color: #718096;
+}
+
+.notif-item:hover {
+  background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+  transform: translateX(4px);
 }
 
 .notif-item small {
   display: block;
-  color: #888;
+  color: #a0aec0;
   font-size: 0.75rem;
+  margin-top: 0.3rem;
+  font-weight: 500;
 }
 
 .no-notifs {
-  padding: 1rem;
+  padding: 2rem 1rem;
   text-align: center;
-  color: #666;
+  color: #a0aec0;
+  font-style: italic;
+  font-size: 0.95rem;
 }
 
 /* Combobox de usuario */
 .user-combobox {
-  background: #222;
+  background: rgba(255, 255, 255, 0.05);
   color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
   font-size: 1rem;
   cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 600;
+}
+
+.user-combobox:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
 }
 
 .user-combobox:focus {
   outline: none;
-  background: #333;
+  background: rgba(255, 255, 255, 0.15);
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
 }
 
 /* ================================= */
@@ -173,74 +384,147 @@
 }
 
 .user-menu-btn {
-  background: none;
-  border: none;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.1);
   cursor: pointer;
   color: white;
-  padding: 0.25rem;
+  padding: 0.6rem;
+  border-radius: 50%;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 1.3rem;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-menu-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1) rotate(360deg);
 }
 
 .user-menu-dropdown {
   position: absolute;
   right: 0;
-  top: 100%;
+  top: calc(100% + 10px);
   margin-top: 0.5rem;
-  background: white;
-  border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  background: linear-gradient(135deg, #ffffff 0%, #f7fafc 100%);
+  border-radius: 12px;
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.3),
+    0 4px 16px rgba(0, 0, 0, 0.2);
   list-style: none;
-  padding: 0;
-  min-width: 150px;
+  padding: 0.5rem 0;
+  min-width: 180px;
   z-index: 100;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  animation: dropdownSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Aquí garantizamos que el texto sea siempre negro */
 .user-menu-dropdown li {
-  padding: 0.75rem 1rem;
+  padding: 0.9rem 1.3rem;
   cursor: pointer;
-  transition: background 0.2s;
-  color: #111;            /* texto negro */
-  font-weight: 500;       /* opcional: ligeramente más grueso */
+  transition: all 0.3s ease;
+  color: #2d3748;
+  font-weight: 600;
+  position: relative;
+  overflow: hidden;
+}
+
+.user-menu-dropdown li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, #4299e1 0%, transparent 100%);
+  transition: width 0.3s ease;
+}
+
+.user-menu-dropdown li:hover::before {
+  width: 4px;
 }
 
 .user-menu-dropdown li:hover {
-  background: #f0f0f0;
-  /* dejamos el texto en negro también al hover */
-  color: #111;
+  background: linear-gradient(135deg, #ebf8ff 0%, #bee3f8 100%);
+  color: #1a202c;
+  transform: translateX(4px);
 }
 
 .cart-icon {
   position: relative;
-  background: none;
-  border: none;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.1);
   color: white;
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   cursor: pointer;
+  padding: 0.6rem;
+  border-radius: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cart-icon:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
 }
 
 .cart-count {
   position: absolute;
-  top: -5px;
-  right: -10px;
-  background: red;
+  top: -8px;
+  right: -8px;
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
   color: white;
-  font-size: 0.8rem;
-  font-weight: bold;
+  font-size: 0.75rem;
+  font-weight: 700;
   border-radius: 50%;
-  padding: 0.2rem 0.4rem;
+  padding: 0.3rem 0.5rem;
+  min-width: 22px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(72, 187, 120, 0.5);
+  animation: cartBounce 0.5s ease;
+}
+
+@keyframes cartBounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
 }
 
 .logo-button {
   background: none;
   border: none;
   color: white;
-  font-size: 1.5rem;
-  font-weight: bold;
+  font-size: 1.6rem;
+  font-weight: 800;
   cursor: pointer;
   text-decoration: none;
+  transition: all 0.3s ease;
+  background: linear-gradient(135deg, #ffffff 0%, #a0aec0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  position: relative;
+}
+
+.logo-button::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #4299e1 0%, #9f7aea 100%);
+  transition: width 0.3s ease;
+}
+
+.logo-button:hover::after {
+  width: 100%;
 }
 
 .logo-button:hover {
-  text-decoration: underline;
+  transform: scale(1.05);
 }
-

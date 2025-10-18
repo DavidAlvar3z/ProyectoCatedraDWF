@@ -1,98 +1,55 @@
-// parametroService.js
-import { secureGetItem } from '../utils/secureStorage';
-
-// THIS IS THE CRITICAL CHANGE: "parametro" -> "parametros"
-const API_URL = "http://localhost:8080/auth/parametros"; // Corrected to plural 'parametros'
-
-const handleResponse = async (resp) => {
-  const contentType = resp.headers.get("content-type");
-  const isJson = contentType && contentType.includes("application/json");
-  const data = isJson ? await resp.json() : await resp.text();
-
-  if (!resp.ok) {
-    const message = typeof data === "string" ? data : JSON.stringify(data);
-    throw new Error(`Error: ${message}`);
-  }
-  return data;
-};
-
-const getToken = () => secureGetItem("token");
+// src/services/parametroService.js
+import { httpClient } from '../utils/httpClient';
+import { API_ENDPOINTS } from '../config/api';
 
 /**
- * Obtener todos los parámetros
+ * Obtiene todos los parámetros del sistema
+ * @returns {Promise<Array>}
  */
 export const getAllParametros = async () => {
-  const token = getToken();
-  if (!token) throw new Error('No se encontró el token de autenticación');
-
-  const resp = await fetch(`${API_URL}/all`, { // Assuming /all is the endpoint for all params
-    headers: { Authorization: `Bearer ${token}` },
-  });
-
-  return handleResponse(resp);
+  return httpClient.get(`${API_ENDPOINTS.PARAMETRO}/all`);
 };
 
 /**
- * Registrar un nuevo parámetro
+ * Crea un nuevo parámetro (Admin)
+ * @param {Object} payload - { clave, valor, descripcion }
+ * @returns {Promise<Object>}
  */
 export const crearParametro = async (payload) => {
-  const token = getToken();
-  if (!token) throw new Error('No se encontró el token de autenticación');
-
-  const resp = await fetch(`${API_URL}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(payload),
-  });
-
-  return handleResponse(resp);
+  return httpClient.post(API_ENDPOINTS.PARAMETRO, payload);
 };
 
 /**
- * Editar un parámetro por ID
+ * Edita un parámetro existente (Admin)
+ * @param {number} id - ID del parámetro
+ * @param {Object} payload - Datos actualizados
+ * @returns {Promise<Object>}
  */
 export const editarParametro = async (id, payload) => {
-  const token = getToken();
-  if (!token) throw new Error('No se encontró el token de autenticación');
-
-  const resp = await fetch(`${API_URL}/${id}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(payload),
-  });
-
-  return handleResponse(resp);
+  if (!id) {
+    throw new Error('ID de parámetro no proporcionado');
+  }
+  
+  return httpClient.put(`${API_ENDPOINTS.PARAMETRO}/${id}`, payload);
 };
 
 /**
- * Obtener un parámetro por clave
- * Si no existe, retorna null
+ * Obtiene un parámetro por su clave
+ * @param {string} clave - Clave del parámetro (ej: "costo_envio", "descuento_cupon")
+ * @returns {Promise<Object|null>}
  */
-export async function getParametroByClave(clave) {
-  const token = getToken();
-  if (!token) {
-    throw new Error('No se encontró el token de autenticación');
+export const getParametroByClave = async (clave) => {
+  if (!clave) {
+    throw new Error('Clave de parámetro no proporcionada');
   }
+
   try {
-    // This URL construction is now correct because API_URL is corrected
-    const response = await fetch(`${API_URL}/clave/${clave}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    // Check for response.ok before parsing JSON
-    if (!response.ok) {
-      // Attempt to read error message from backend if available, otherwise use status text
-      const errorBody = await response.text(); // Read as text first
-      throw new Error(`Error ${response.status}: ${errorBody || response.statusText}`);
-    }
-    return await response.json();
+    return await httpClient.get(`${API_ENDPOINTS.PARAMETRO}/clave/${clave}`);
   } catch (error) {
-    console.error("Error en getParametroByClave:", error);
+    // Si no existe, retornar null en lugar de error
+    if (error.message.includes('404')) {
+      return null;
+    }
     throw error;
   }
-}
+};

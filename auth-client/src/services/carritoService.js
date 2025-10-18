@@ -1,42 +1,50 @@
-// src/services/carritoService.js
-import { httpClient } from '../utils/httpClient';
-import { API_ENDPOINTS } from '../config/api';
 import { secureGetItem } from '../utils/secureStorage';
 
-/**
- * Obtiene o crea el carrito del usuario
- * @param {number} idUser - ID del usuario
- * @returns {Promise<Object>} - Objeto carrito
- */
-export const getOrCreateCarrito = async (idUser) => {
-  const userId = idUser || parseInt(secureGetItem('userId'), 10);
-  
-  if (!userId) {
-    throw new Error('ID de usuario no proporcionado');
-  }
-  
-  return httpClient.get(`${API_ENDPOINTS.CARRITO}/${userId}`);
+const API_URL = "http://localhost:8080/auth/carrito";
+const getToken = () => {
+  const token = secureGetItem('token');
+  return token ? `Bearer ${token}` : null;
 };
 
-/**
- * Obtiene los items de un carrito
- * @param {number} idCarrito - ID del carrito
- * @returns {Promise<Array>} - Lista de items con fallbacks
- */
-export const getCarritoItems = async (idCarrito) => {
-  if (!idCarrito) {
-    throw new Error('ID de carrito no proporcionado');
-  }
+// Obtiene o crea el carrito del usuario
+export const getOrCreateCarrito = async (idUser) => {
+  const token = getToken();
+  if (!token) throw new Error('No se encontró el token de autenticación');
   
-  const items = await httpClient.get(`${API_ENDPOINTS.CARRITO}/${idCarrito}/items`);
+  const userId = idUser || parseInt(secureGetItem('userId'), 10); // Fallback to secure-ls
+  if (!userId) throw new Error('ID de usuario no proporcionado');
+  
+  const resp = await fetch(`${API_URL}/${userId}`, {
+    headers: { 'Authorization': token }
+  });
+  const text = await resp.text();
+  if (!resp.ok) throw new Error(`Error al obtener/crear carrito: ${text}`);
+  return JSON.parse(text);
+};
 
-  // Asegurar estructura consistente con fallbacks
+// Obtiene los ítems de un carrito
+export const getCarritoItems = async (idCarrito) => {
+  const token = getToken();
+  if (!token) throw new Error('No se encontró el token de autenticación');
+  
+  if (!idCarrito) throw new Error('ID de carrito no proporcionado');
+  const resp = await fetch(`${API_URL}/${idCarrito}/items`, {
+    headers: { 'Authorization': token }
+  });
+  const text = await resp.text();
+  if (!resp.ok) throw new Error(`Error al obtener ítems del carrito: ${text}`);
+  const items = JSON.parse(text);
+
+  // Debugging log to verify the structure of the response
+  console.log('Response from API (Carrito Items):', items);
+
+  // Ensure each item has a valid producto object
   return items.map((item) => ({
     ...item,
     producto: {
       ...item.producto,
       nombre: item.producto?.nombre || 'Producto desconocido',
-      imagen: item.producto?.imagen || '/placeholder.jpg',
+      imagen: item.producto?.imagen || 'placeholder.jpg',
       precio: item.producto?.precio || 0,
     },
   }));

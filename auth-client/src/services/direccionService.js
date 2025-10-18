@@ -1,43 +1,64 @@
 // src/services/direccionService.js
-import { httpClient } from '../utils/httpClient';
-import { API_ENDPOINTS } from '../config/api';
+import { secureGetItem } from '../utils/secureStorage';
 
-/**
- * Obtiene las direcciones de un usuario
- * @param {number} idUser - ID del usuario
- * @returns {Promise<Array>}
- */
+const BASE = 'http://localhost:8080/auth/direcciones';
+
+const getAuthHeaders = () => {
+  const token = secureGetItem('token');
+  return token ? { 'Authorization': `Bearer ${token}` } : {};
+};
+
+// Obtener direcciones por ID de usuario
 export const getByUserDirecciones = async (idUser) => {
-  if (!idUser) {
-    throw new Error('ID de usuario no proporcionado');
+  try {
+    const response = await fetch(`${BASE}/user/${idUser}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders()
+      }
+    });
+    if (!response.ok) throw new Error('Error al cargar direcciones');
+    return await response.json();
+  } catch (error) {
+    console.error(error);
+    throw error;
   }
-  
-  return httpClient.get(`${API_ENDPOINTS.DIRECCION}/user/${idUser}`);
 };
 
-/**
- * Guarda una nueva dirección
- * @param {Object} direccion - Datos de la dirección
- * @param {number} idUser - ID del usuario
- * @returns {Promise<Object>}
- */
+// Guardar una nueva dirección para un usuario
 export const saveDireccion = async (direccion, idUser) => {
-  if (!idUser) {
-    throw new Error('ID de usuario no proporcionado');
+  try {
+    const response = await fetch(`${BASE}?idUser=${idUser}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders()
+      },
+      body: JSON.stringify(direccion)
+    });
+    if (!response.ok) throw new Error('Error al guardar dirección');
+    return await response.json();
+  } catch (error) {
+    console.error(error);
+    throw error;
   }
-  
-  return httpClient.post(`${API_ENDPOINTS.DIRECCION}?idUser=${idUser}`, direccion);
 };
 
-/**
- * Actualiza una dirección existente
- * @param {Object} direccion - Datos actualizados (debe incluir idDireccion)
- * @returns {Promise<Object>}
- */
+// Actualizar una dirección existente
 export const updateDireccion = async (direccion) => {
-  if (!direccion.idDireccion) {
-    throw new Error('ID de dirección no proporcionado');
+  try {
+    const response = await fetch(BASE, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders()
+      },
+      body: JSON.stringify(direccion)
+    });
+    if (!response.ok) throw new Error('Error al actualizar dirección');
+    return await response.json();
+  } catch (error) {
+    console.error(error);
+    throw error;
   }
-  
-  return httpClient.put(API_ENDPOINTS.DIRECCION, direccion);
 };

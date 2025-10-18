@@ -1,35 +1,26 @@
-// src/services/authService.js
-import { jwtDecode } from 'jwt-decode';
-import { httpClient } from '../utils/httpClient';
-import { secureSetItem } from '../utils/secureStorage';
-import { API_ENDPOINTS } from '../config/api';
+import { jwtDecode } from 'jwt-decode'; // Use named import for jwtDecode
 
-/**
- * Registra un nuevo usuario
- * @param {Object} userData - Datos del usuario
- * @returns {Promise<string>} - Token JWT
- */
-export async function register(userData) {
-  const {
-    username,
-    email,
-    password,
-    primerNombre,
-    segundoNombre,
-    primerApellido,
-    segundoApellido,
-    fechaNacimiento,
-    telefono,
-    dui,
-    direccion,
-  } = userData;
+const API_URL = 'http://localhost:8080/auth'; // Eliminamos la barra final para evitar duplicados
 
+export async function register({
+  username,
+  email,
+  password,
+  primerNombre,
+  segundoNombre,
+  primerApellido,
+  segundoApellido,
+  fechaNacimiento,
+  telefono,
+  dui,
+  direccion
+}) {
   try {
-    // No usar httpClient aquí porque no tenemos token aún
-    const response = await fetch(`${API_ENDPOINTS.AUTH}/register`, {
+    const res = await fetch(`${API_URL}/register`, {
       method: 'POST',
-      headers: {
+      headers: { 
         'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
       },
       body: JSON.stringify({
         username,
@@ -40,77 +31,62 @@ export async function register(userData) {
         primerApellido,
         segundoApellido,
         fechaNacimiento,
+        
         telefono,
         dui,
-        direccion,
-      }),
+        direccion
+      })
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Error al registrar usuario');
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.message || 'Error al registrar');
     }
 
-    const token = await response.text();
-    
-    // Decodificar y guardar userId
-    const decoded = jwtDecode(token);
-    if (decoded?.userId) {
-      secureSetItem('userId', decoded.userId.toString());
-    }
-
-    return token;
+    return await res.text(); // retorna el token
   } catch (error) {
-    console.error('Error en registro:', error.message);
+    console.error('Error en register:', error.message);
     throw error;
   }
 }
 
-/**
- * Inicia sesión de usuario
- * @param {string} username - Nombre de usuario
- * @param {string} password - Contraseña
- * @returns {Promise<string>} - Token JWT
- */
 export async function login(username, password) {
   try {
-    const response = await fetch(`${API_ENDPOINTS.AUTH}/login`, {
+    const res = await fetch(`${API_URL}/login`, {
       method: 'POST',
-      headers: {
+      headers: { 
         'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
       },
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ username, password })
     });
 
-    if (!response.ok) {
+    if (!res.ok) {
       let errorMsg = 'Error al iniciar sesión';
-      
       try {
-        const error = await response.json();
-        if (error?.message) {
-          errorMsg = error.message;
-        } else if (response.status === 401) {
+        const err = await res.json();
+        // Si el backend retorna un mensaje específico, úsalo
+        if (err && err.message) {
+          errorMsg = err.message;
+        } else if (res.status === 401) {
           errorMsg = 'Usuario o contraseña incorrectos';
         }
       } catch {
-        if (response.status === 401) {
+        if (res.status === 401) {
           errorMsg = 'Usuario o contraseña incorrectos';
         }
       }
-      
       throw new Error(errorMsg);
     }
 
-    const token = await response.text();
+    const token = await res.text();
     const decoded = jwtDecode(token);
 
     if (!decoded || !decoded.userId) {
-      throw new Error('El token no contiene un userId válido');
+      throw new Error('El token no contiene un userId válido.');
     }
 
-    // Guardar userId en secureStorage (NO localStorage)
-    secureSetItem('userId', decoded.userId.toString());
-
+    localStorage.setItem('userId', decoded.userId); // Store userId in localStorage
     return token;
   } catch (error) {
     console.error('Error en login:', error.message);

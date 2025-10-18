@@ -1,168 +1,131 @@
-import { secureGetItem } from '../utils/secureStorage';
-
-const API_URL = "http://localhost:8080/auth/pedido";
-
-const handleResponse = async (resp) => {
-  const contentType = resp.headers.get("content-type");
-  const isJson = contentType && contentType.includes("application/json");
-  const data = isJson ? await resp.json() : await resp.text();
-
-  if (!resp.ok) {
-    const message = typeof data === "string" ? data : JSON.stringify(data);
-    throw new Error(`Error: ${message}`);
-  }
-  return data;
-};
-
-const getToken = () => secureGetItem("token");
+// src/services/pedidoService.js
+import { httpClient } from '../utils/httpClient';
+import { API_ENDPOINTS } from '../config/api';
 
 /**
- * Admin: todos los pedidos, paginados
+ * Obtiene todos los pedidos (Admin) - Paginado
+ * @param {number} page - Número de página
+ * @param {number} size - Tamaño de página
+ * @returns {Promise<{items: Array, page: number, totalPages: number}>}
  */
 export const getAllPedidos = async (page = 0, size = 10) => {
-  const token = getToken(); // Suponiendo que tienes una función para obtener el token
-  if (!token) throw new Error('No se encontró el token de autenticación');
+  const data = await httpClient.get(
+    `${API_ENDPOINTS.PEDIDO}/all?page=${page}&size=${size}`
+  );
 
-  const params = new URLSearchParams({ page, size });
-  try {
-    const resp = await fetch(`${API_URL}/all?${params}`, {
-      headers: { "Authorization": `Bearer ${token}` },
-    });
+  const items = data._embedded?.pedidoResponseList || [];
+  const pageInfo = data.page || {};
 
-    if (!resp.ok) {
-      const message = await resp.text();
-      throw new Error(`Error en la solicitud: ${message}`);
-    }
-
-    const data = await resp.json();
-    console.log("Respuesta cruda del backend:", data);
-
-    // Extraer la lista de pedidos de _embedded.pedidoResponseList
-    const items = data._embedded?.pedidoResponseList || [];
-    console.log("Pedidos extraídos:", items);
-
-    // Extraer información de paginación
-    const pageInfo = data.page || {};
-
-    return {
-      items, // Lista de pedidos
-      page: pageInfo.number || 0, // Número de página actual
-      size: pageInfo.size || size, // Tamaño de la página
-      totalPages: pageInfo.totalPages || 1, // Total de páginas
-      totalElements: pageInfo.totalElements || items.length, // Total de elementos
-    };
-  } catch (error) {
-    console.error("Error al obtener los pedidos:", error);
-    throw error;
-  }
+  return {
+    items,
+    page: pageInfo.number || 0,
+    size: pageInfo.size || size,
+    totalPages: pageInfo.totalPages || 1,
+    totalElements: pageInfo.totalElements || items.length,
+  };
 };
 
 /**
- * Usuario: sus pedidos, paginados
+ * Obtiene pedidos de un usuario - Paginado
+ * @param {number} idUser - ID del usuario
+ * @param {number} page - Número de página
+ * @param {number} size - Tamaño de página
+ * @returns {Promise<{items: Array, page: number, totalPages: number}>}
  */
 export const getPedidosByUser = async (idUser, page = 0, size = 10) => {
-  if (!idUser) throw new Error("ID de usuario no proporcionado");
-  const token = getToken();
-  if (!token) throw new Error('No se encontró el token de autenticación');
+  if (!idUser) {
+    throw new Error('ID de usuario no proporcionado');
+  }
 
-  const params = new URLSearchParams({ page, size });
-  const resp = await fetch(`${API_URL}/user/${idUser}?${params}`, {
-    headers: { "Authorization": `Bearer ${token}` },
-  });
-  const data = await handleResponse(resp);
+  const data = await httpClient.get(
+    `${API_ENDPOINTS.PEDIDO}/user/${idUser}?page=${page}&size=${size}`
+  );
 
-  const items = Array.isArray(data._embedded?.pedidoResponseList)
-    ? data._embedded.pedidoResponseList
-    : [];
+  const items = data._embedded?.pedidoResponseList || [];
   const pageInfo = data.page || {};
 
   return {
     items,
     page: pageInfo.number ?? 0,
-    size: pageInfo.size ?? items.length,
+    size: pageInfo.size ?? size,
     totalPages: pageInfo.totalPages ?? 1,
     totalElements: pageInfo.totalElements ?? items.length,
   };
 };
 
 /**
- * Checkout (crear pedido)
+ * Obtiene un pedido por ID
+ * @param {number} idPedido - ID del pedido
+ * @returns {Promise<Object>}
  */
-export const checkoutPedido = async (payload) => {
-  const token = getToken();
-  if (!token) throw new Error('No se encontró el token de autenticación');
-  const resp = await fetch(`${API_URL}/checkout`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(payload),
-  });
-  return handleResponse(resp);
+export const getPedidoById = async (idPedido) => {
+  if (!idPedido) {
+    throw new Error('ID de pedido no proporcionado');
+  }
+  
+  return httpClient.get(`${API_ENDPOINTS.PEDIDO}/${idPedido}`);
 };
 
 /**
- * Cambia el estado de un pedido (ADMIN)
+ * Realiza el checkout (crear pedido)
+ * @param {Object} payload - { idCarrito, tipoPago, cuponCodigo?, idDireccion }
+ * @returns {Promise<Object>}
+ */
+export const checkoutPedido = async (payload) => {
+  return httpClient.post(`${API_ENDPOINTS.PEDIDO}/checkout`, payload);
+};
+
+/**
+ * Actualiza el estado de un pedido (Admin)
+ * @param {number} idPedido - ID del pedido
+ * @param {string} newEstado - Nuevo estado (PENDIENTE, PAGADO, EN_PROCESO, ENTREGADO, CANCELADO)
+ * @returns {Promise<Object>}
  */
 export const updatePedidoEstado = async (idPedido, newEstado) => {
   const endpointMap = {
-    PENDIENTE: "confirmar",
-    PAGADO: "pagar",
-    EN_PROCESO: "envio",
-    ENTREGADO: "entregar",
-    CANCELADO: "cancelar?motivo=admin"
+    PENDIENTE: 'confirmar',
+    PAGADO: 'pagar',
+    EN_PROCESO: 'envio',
+    ENTREGADO: 'entregar',
+    CANCELADO: 'cancelar?motivo=admin',
   };
+
   const action = endpointMap[newEstado];
-  if (!action) throw new Error("Estado inválido");
-  const token = getToken();
-  if (!token) throw new Error('No se encontró el token de autenticación');
-  const resp = await fetch(`${API_URL}/${idPedido}/${action}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  return handleResponse(resp);
+  
+  if (!action) {
+    throw new Error(`Estado inválido: ${newEstado}`);
+  }
+
+  return httpClient.post(`${API_ENDPOINTS.PEDIDO}/${idPedido}/${action}`, {});
 };
 
 /**
- * Dashboard: ganancias totales
+ * Obtiene ganancias totales (Dashboard)
+ * @returns {Promise<number>}
  */
 export const getGananciasTotales = async () => {
-  const token = getToken();
-  if (!token) throw new Error('No se encontró el token de autenticación');
-  const resp = await fetch(`${API_URL}/dashboard/ganancias/totales`, {
-    headers: { "Authorization": `Bearer ${token}` },
-  });
-  if (!resp.ok) throw new Error(await resp.text());
-  return await resp.json();
+  return httpClient.get(`${API_ENDPOINTS.PEDIDO}/dashboard/ganancias/totales`);
 };
 
 /**
- * Dashboard: ganancias por periodo
+ * Obtiene ganancias por periodo (Dashboard)
+ * @param {string} fechaInicio - Fecha inicio (YYYY-MM-DD)
+ * @param {string} fechaFin - Fecha fin (YYYY-MM-DD)
+ * @returns {Promise<number>}
  */
 export const getGananciasPorPeriodo = async (fechaInicio, fechaFin) => {
-  const token = getToken();
-  if (!token) throw new Error('No se encontró el token de autenticación');
-  const params = new URLSearchParams({ fechaInicio, fechaFin });
-  const resp = await fetch(`${API_URL}/dashboard/ganancias/periodo?${params}`, {
-    headers: { "Authorization": `Bearer ${token}` },
-  });
-  if (!resp.ok) throw new Error(await resp.text());
-  return await resp.json();
+  return httpClient.get(
+    `${API_ENDPOINTS.PEDIDO}/dashboard/ganancias/periodo?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`
+  );
 };
 
 /**
- * Dashboard: productos más vendidos
+ * Obtiene productos más vendidos (Dashboard)
+ * @param {number} limit - Cantidad de productos
+ * @returns {Promise<Object>}
  */
 export const getProductosMasVendidos = async (limit = 5) => {
-  const token = getToken();
-  if (!token) throw new Error('No se encontró el token de autenticación');
-  const resp = await fetch(`${API_URL}/dashboard/productos-mas-vendidos?limit=${limit}`, {
-    headers: { "Authorization": `Bearer ${token}` },
-  });
-  if (!resp.ok) throw new Error(await resp.text());
-  return await resp.json();
+  return httpClient.get(
+    `${API_ENDPOINTS.PEDIDO}/dashboard/productos-mas-vendidos?limit=${limit}`
+  );
 };

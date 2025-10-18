@@ -1,69 +1,61 @@
-const API_URL = "http://localhost:8080/auth/tipoproducto";
-const getToken = () => localStorage.getItem('token');
+// src/services/TipoProductoService.js
+import { httpClient } from '../utils/httpClient';
+import { API_ENDPOINTS } from '../config/api';
 
-// GET (público)
+/**
+ * Obtiene todos los tipos de producto
+ * @returns {Promise<Array>}
+ */
 export const getAllTiposProductos = async () => {
-    const resp = await fetch(API_URL);
-    if (!resp.ok) {
-      const text = await resp.text();
-      throw new Error(`No se pudieron obtener tipos: ${text}`);
-    }
-    return resp.json();
-  };
-  
+  return httpClient.get(API_ENDPOINTS.TIPO_PRODUCTO);
+};
 
-// GET por ID (público)
+/**
+ * Obtiene un tipo de producto por ID
+ * @param {number} id - ID del tipo
+ * @returns {Promise<Object>}
+ */
 export const getTipoProductoById = async (id) => {
-  if (!id) throw new Error('ID no proporcionado');
-  const resp = await fetch(`${API_URL}/${id}`);
-  if (!resp.ok) throw new Error(`TipoProducto ${id} no encontrado`);
-  return resp.json();
+  if (!id) {
+    throw new Error('ID de tipo de producto no proporcionado');
+  }
+  
+  return httpClient.get(`${API_ENDPOINTS.TIPO_PRODUCTO}/${id}`);
 };
 
-// POST (ADMIN)
+/**
+ * Crea un nuevo tipo de producto (Admin)
+ * @param {Object} tipoProducto - Datos del tipo
+ * @returns {Promise<Object>}
+ */
 export const createTipoProducto = async (tipoProducto) => {
-  const token = getToken();
-  const resp = await fetch(API_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-    },
-    body: JSON.stringify(tipoProducto),
-  });
-
-  const responseText = await resp.text();
-  if (!resp.ok) throw new Error('Error al crear tipo de producto: ' + responseText);
-  return JSON.parse(responseText);
+  return httpClient.post(API_ENDPOINTS.TIPO_PRODUCTO, tipoProducto);
 };
 
-// PUT (ADMIN)
+/**
+ * Actualiza un tipo de producto (Admin)
+ * @param {number} id - ID del tipo
+ * @param {Object} tipoProducto - Datos actualizados
+ * @returns {Promise<Object>}
+ */
 export const updateTipoProducto = async (id, tipoProducto) => {
-  if (!id) throw new Error('ID no proporcionado para update');
-  const token = getToken();
-  const resp = await fetch(`${API_URL}/${id}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-    },
-    body: JSON.stringify(tipoProducto),
-  });
-
-  const responseText = await resp.text();
-  if (!resp.ok) throw new Error('Error al actualizar tipo de producto: ' + responseText);
-  return JSON.parse(responseText);
+  if (!id) {
+    throw new Error('ID de tipo de producto no proporcionado');
+  }
+  
+  return httpClient.put(`${API_ENDPOINTS.TIPO_PRODUCTO}/${id}`, tipoProducto);
 };
 
-// DELETE (ADMIN)
+/**
+ * Elimina un tipo de producto (Admin)
+ * @param {number} id - ID del tipo
+ * @returns {Promise<{success: boolean}>}
+ */
 export const deleteTipoProducto = async (id) => {
-  if (!id) throw new Error('ID no proporcionado para delete');
-  const token = getToken();
-  const resp = await fetch(`${API_URL}/${id}`, {
-    method: 'DELETE',
-    headers: { 'Authorization': `Bearer ${token}` }
-  });
-
-  if (!resp.ok) throw new Error(`Error al eliminar tipo de producto ${id}`);
+  if (!id) {
+    throw new Error('ID de tipo de producto no proporcionado');
+  }
+  
+  await httpClient.delete(`${API_ENDPOINTS.TIPO_PRODUCTO}/${id}`);
   return { success: true };
 };

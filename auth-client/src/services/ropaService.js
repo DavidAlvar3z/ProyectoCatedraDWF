@@ -1,60 +1,61 @@
-const API_URL = "http://localhost:8080/auth/ropa";
-const getToken = () => localStorage.getItem('token');
+// src/services/ropaService.js
+import { httpClient } from '../utils/httpClient';
+import { API_ENDPOINTS } from '../config/api';
 
-// GET (público)
+/**
+ * Obtiene todas las prendas
+ * @returns {Promise<Array>}
+ */
 export const getAllRopa = async () => {
-  const resp = await fetch(API_URL);
-  if (!resp.ok) throw new Error('No se pudo obtener la lista');
-  return resp.json();
+  return httpClient.get(API_ENDPOINTS.ROPA);
 };
 
-// GET por ID (público)
+/**
+ * Obtiene una prenda por ID
+ * @param {number} id - ID de la prenda
+ * @returns {Promise<Object>}
+ */
 export const getRopaById = async (id) => {
-  if (!id) throw new Error('ID no proporcionado');
-  const resp = await fetch(`${API_URL}/${id}`);
-  if (!resp.ok) throw new Error(`Prenda ${id} no encontrada`);
-  return resp.json();
+  if (!id) {
+    throw new Error('ID de prenda no proporcionado');
+  }
+  
+  return httpClient.get(`${API_ENDPOINTS.ROPA}/${id}`);
 };
 
-// POST (ADMIN)
+/**
+ * Crea una nueva prenda (Admin)
+ * @param {Object} ropa - Datos de la prenda
+ * @returns {Promise<Object>}
+ */
 export const createRopa = async (ropa) => {
-  const token = getToken();
-  const resp = await fetch(API_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify(ropa),
-  });
-  if (!resp.ok) throw new Error('Error al crear prenda');
-  return resp.json();
+  return httpClient.post(API_ENDPOINTS.ROPA, ropa);
 };
 
-// PUT (ADMIN) ← aquí va el token
+/**
+ * Actualiza una prenda (Admin)
+ * @param {number} id - ID de la prenda
+ * @param {Object} ropa - Datos actualizados
+ * @returns {Promise<Object>}
+ */
 export const updateRopa = async (id, ropa) => {
-  if (!id) throw new Error('ID no proporcionado para update');
-  const token = getToken();
-  const resp = await fetch(`${API_URL}/${id}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`  // ← Asegúrate de mandarlo
-    },
-    body: JSON.stringify(ropa),
-  });
-  if (!resp.ok) throw new Error(`Error al actualizar prenda ${id}`);
-  return resp.json();
+  if (!id) {
+    throw new Error('ID de prenda no proporcionado');
+  }
+  
+  return httpClient.put(`${API_ENDPOINTS.ROPA}/${id}`, ropa);
 };
 
-// DELETE (ADMIN)
+/**
+ * Elimina una prenda (Admin)
+ * @param {number} id - ID de la prenda
+ * @returns {Promise<{success: boolean}>}
+ */
 export const deleteRopa = async (id) => {
-  if (!id) throw new Error('ID no proporcionado para delete');
-  const token = getToken();
-  const resp = await fetch(`${API_URL}/${id}`, {
-    method: 'DELETE',
-    headers: { 'Authorization': `Bearer ${token}` }
-  });
-  if (!resp.ok) throw new Error(`Error al eliminar prenda ${id}`);
+  if (!id) {
+    throw new Error('ID de prenda no proporcionado');
+  }
+  
+  await httpClient.delete(`${API_ENDPOINTS.ROPA}/${id}`);
   return { success: true };
 };

@@ -1,159 +1,127 @@
-import { secureGetItem } from '../utils/secureStorage';
+// src/services/userService.js
+import { httpClient } from '../utils/httpClient';
+import { API_ENDPOINTS } from '../config/api';
 
-const API_URL = 'http://localhost:8080/auth/users';
-const getToken = () => secureGetItem('token');
-
-/** GET perfil del usuario */
+/**
+ * Obtiene el perfil de un usuario
+ * @param {number} userId - ID del usuario
+ * @returns {Promise<Object>}
+ */
 export const getUserProfile = async (userId) => {
-  const token = getToken();
-  if (!token) throw new Error('No autenticado');
-  const resp = await fetch(`${API_URL}/${userId}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (!resp.ok) {
-    const text = await resp.text();
-    throw new Error(text || 'Error al obtener perfil');
+  if (!userId) {
+    throw new Error('ID de usuario no proporcionado');
   }
-  return resp.json();
+  
+  return httpClient.get(`${API_ENDPOINTS.USERS}/${userId}`);
 };
 
-/** PUT actualizar perfil */
+/**
+ * Actualiza el perfil del usuario
+ * @param {Object} data - { userId, currentPassword, newUsername, newEmail }
+ * @returns {Promise<Object>}
+ */
 export const updateProfile = async ({ userId, currentPassword, newUsername, newEmail }) => {
-  const token = getToken();
-  if (!token) throw new Error('No autenticado');
-  const resp = await fetch(`${API_URL}/${userId}/profile`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({ currentPassword, newUsername, newEmail }),
-  });
-  if (!resp.ok) {
-    const text = await resp.text();
-    throw new Error(text || 'Error al actualizar perfil');
+  if (!userId) {
+    throw new Error('ID de usuario no proporcionado');
   }
-  return resp.json();
+
+  return httpClient.put(`${API_ENDPOINTS.USERS}/${userId}/profile`, {
+    currentPassword,
+    newUsername,
+    newEmail,
+  });
 };
 
-/** PUT cambiar contraseña */
+/**
+ * Cambia la contraseña del usuario
+ * @param {Object} data - { userId, currentPassword, newPassword }
+ * @returns {Promise<boolean>}
+ */
 export const changePassword = async ({ userId, currentPassword, newPassword }) => {
-  const token = getToken();
-  if (!token) throw new Error('No autenticado');
-  const params = new URLSearchParams({ currentPassword, newPassword });
-  const resp = await fetch(`${API_URL}/${userId}/password?${params}`, {
-    method: 'PUT',
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (!resp.ok) {
-    const text = await resp.text();
-    throw new Error(text || 'Error al cambiar contraseña');
+  if (!userId) {
+    throw new Error('ID de usuario no proporcionado');
   }
-  return true; // 204 No Content no devuelve un cuerpo de respuesta
+
+  await httpClient.put(
+    `${API_ENDPOINTS.USERS}/${userId}/password?currentPassword=${currentPassword}&newPassword=${newPassword}`
+  );
+  
+  return true;
 };
 
-// --- Nuevas funciones para los endpoints de administrador ---
-
-/** GET obtener todos los usuarios paginados (Admin) */
+/**
+ * Obtiene todos los usuarios (Admin) - Paginado
+ * @param {number} page - Número de página
+ * @param {number} size - Tamaño de página
+ * @param {string} sort - Ordenamiento (ej: "idUser,asc")
+ * @returns {Promise<Object>}
+ */
 export const getAllUsersPaginated = async (page = 0, size = 10, sort = 'idUser,asc') => {
-  const token = getToken();
-  if (!token) throw new Error('No autenticado');
-  const resp = await fetch(`${API_URL}/paginated?page=${page}&size=${size}&sort=${sort}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (!resp.ok) {
-    const text = await resp.text();
-    throw new Error(text || 'Error al obtener usuarios paginados');
-  }
-  return resp.json(); // Esto devolverá el objeto Page de Spring Data
+  return httpClient.get(
+    `${API_ENDPOINTS.USERS}/paginated?page=${page}&size=${size}&sort=${sort}`
+  );
 };
 
-/** POST crear un nuevo usuario (Admin) */
+/**
+ * Crea un nuevo usuario (Admin)
+ * @param {Object} userData - Datos del usuario
+ * @returns {Promise<Object>}
+ */
 export const createUser = async (userData) => {
-  const token = getToken();
-  if (!token) throw new Error('No autenticado');
-  const resp = await fetch(API_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(userData),
-  });
-  if (!resp.ok) {
-    const text = await resp.text();
-    throw new Error(text || 'Error al crear usuario');
-  }
-  return resp.json();
+  return httpClient.post(API_ENDPOINTS.USERS, userData);
 };
 
-/** PUT actualizar usuario por ID (Admin) */
+/**
+ * Actualiza un usuario (Admin)
+ * @param {number} userId - ID del usuario
+ * @param {Object} userData - Datos actualizados
+ * @returns {Promise<Object>}
+ */
 export const updateUserByAdmin = async (userId, userData) => {
-  const token = getToken();
-  if (!token) throw new Error('No autenticado');
-  const resp = await fetch(`${API_URL}/${userId}/admin`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(userData),
-  });
-  if (!resp.ok) {
-    const text = await resp.text();
-    throw new Error(text || 'Error al actualizar usuario por admin');
+  if (!userId) {
+    throw new Error('ID de usuario no proporcionado');
   }
-  return resp.json();
+  
+  return httpClient.put(`${API_ENDPOINTS.USERS}/${userId}/admin`, userData);
 };
 
-/** DELETE eliminar un usuario por ID (Admin) */
+/**
+ * Elimina un usuario (Admin)
+ * @param {number} userId - ID del usuario
+ * @returns {Promise<boolean>}
+ */
 export const deleteUser = async (userId) => {
-  const token = getToken();
-  if (!token) throw new Error('No autenticado');
-  const resp = await fetch(`${API_URL}/${userId}`, {
-    method: 'DELETE',
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (!resp.ok) {
-    const text = await resp.text();
-    throw new Error(text || 'Error al eliminar usuario');
+  if (!userId) {
+    throw new Error('ID de usuario no proporcionado');
   }
-  return true; // 204 No Content
+  
+  await httpClient.delete(`${API_ENDPOINTS.USERS}/${userId}`);
+  return true;
 };
 
-/** GET obtener todos los usuarios (sin paginar, si aún lo necesitas) */
+/**
+ * Lista todos los usuarios sin paginar (Legacy)
+ * @returns {Promise<Array>}
+ */
 export const listUsers = async () => {
-    const token = getToken();
-    if (!token) throw new Error('No autenticado');
-    const resp = await fetch(API_URL, {
-        headers: { Authorization: `Bearer ${token}` },
-    });
-    if (!resp.ok) {
-        const text = await resp.text();
-        throw new Error(text || 'Error al obtener la lista de usuarios');
-    }
-    return resp.json();
+  return httpClient.get(API_ENDPOINTS.USERS);
 };
 
-// Alias para compatibilidad con UserCrud
-export const getAllUsers = getAllUsersPaginated;
-
-// Actualizar solo el rol de un usuario (Admin)
+/**
+ * Actualiza solo el rol de un usuario (Admin)
+ * @param {number} userId - ID del usuario
+ * @param {string} newRole - Nuevo rol (ROLE_USER, ROLE_ADMIN, ROLE_EMPLOYEE)
+ * @returns {Promise<Object>}
+ */
 export const updateUserRole = async (userId, newRole) => {
-  const token = getToken();
-  if (!token) throw new Error('No autenticado');
-  // El backend espera { roleName: ... }
-  const resp = await fetch(`${API_URL}/${userId}/admin`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({ roleName: newRole }),
-  });
-  if (!resp.ok) {
-    const text = await resp.text();
-    throw new Error(text || 'Error al actualizar rol');
+  if (!userId) {
+    throw new Error('ID de usuario no proporcionado');
   }
-  return resp.json();
+  
+  return httpClient.put(`${API_ENDPOINTS.USERS}/${userId}/admin`, {
+    roleName: newRole,
+  });
 };
+
+// Alias para compatibilidad
+export const getAllUsers = getAllUsersPaginated;

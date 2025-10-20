@@ -1,112 +1,138 @@
-// src/components/Footer.jsx
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
 export default function Footer() {
+  const footerSections = [
+    {
+      title: "Tienda",
+      links: [
+        { to: "/products", label: "Todos los productos" },
+        { to: "/featured", label: "Destacados" },
+        { to: "/new-arrivals", label: "Novedades" },
+        { to: "/sale", label: "En oferta" },
+        { to: "/gift-cards", label: "Tarjetas de regalo" }
+      ]
+    },
+    {
+      title: "Atención al Cliente",
+      links: [
+        { to: "/contact", label: "Contáctanos" },
+        { to: "/faq", label: "Preguntas frecuentes" },
+        { to: "/shipping-policy", label: "Política de envíos" },
+        { to: "/returns", label: "Devoluciones y reembolsos" },
+        { to: "/track-order", label: "Rastrear pedido" }
+      ]
+    },
+    {
+      title: "Acerca de",
+      links: [
+        { to: "/about", label: "Nuestra historia" },
+        { to: "/careers", label: "Empleos" },
+        { to: "/terms", label: "Términos y condiciones" },
+        { to: "/privacy", label: "Política de privacidad" },
+        { to: "/blog", label: "Blog" }
+      ]
+    }
+  ];
+
+  const socialLinks = [
+    { icon: "fab fa-facebook-f", href: "#", color: "hover:text-blue-500" },
+    { icon: "fab fa-twitter", href: "#", color: "hover:text-sky-400" },
+    { icon: "fab fa-instagram", href: "#", color: "hover:text-pink-500" },
+    { icon: "fab fa-pinterest", href: "#", color: "hover:text-red-500" }
+  ];
+
   return (
     <motion.footer
       initial={{ y: 60, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6, delay: 0.3 }}
-      style={{
-        background: "#232b39",
-        color: "#fff",
-        paddingTop: "3rem",
-        paddingBottom: "1.5rem"
-      }}
+      className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white pt-16 pb-8"
     >
-      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 1rem" }}>
-        <div style={{ display: "grid", gap: "2rem", marginBottom: "2rem" }}>
-          <style>{`
-            @media (min-width: 768px) {
-              .footer-grid {
-                grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-              }
-            }
-            .footer-link:hover { color: #fff !important; text-decoration: underline; }
-            .footer-title { font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem; }
-            .footer-list { list-style: none; padding: 0; margin: 0; }
-            .footer-list li { margin-bottom: 0.5rem; }
-            .footer-social a { color: #a0aec0; margin-right: 1rem; font-size: 1.1rem; transition: color 0.2s; }
-            .footer-social a:last-child { margin-right: 0; }
-            .footer-social a:hover { color: #fff; }
-            .footer-copy { color: #a0aec0; margin: 0; }
-            .footer-divider { border-top: 1px solid #374151; margin: 2rem 0 1.5rem; }
-          `}</style>
-
-          <div
-            className="footer-grid"
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(1, minmax(0, 1fr))",
-              gap: "2rem"
-            }}
+      <div className="max-w-7xl mx-auto px-4">
+        {/* Main Content */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+          {/* Brand Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
           >
-            {/* Logo + descripción */}
-            <div>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
-                <i className="fas fa-bolt" style={{ color: "#818cf8", fontSize: "2rem" }}></i>
-                <h3 style={{ fontSize: "1.25rem", fontWeight: "bold" }}>
-                  Tienda<span style={{ color: "#818cf8" }}>Ecommerce</span>
-                </h3>
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                <i className="fas fa-bolt text-white text-xl"></i>
               </div>
-              <p style={{ color: "#a0aec0", marginBottom: "1rem" }}>
-                Plataforma de comercio electrónico premium que ofrece los mejores productos a precios competitivos.
-              </p>
-              <div className="footer-social" style={{ display: "flex", gap: "1rem" }}>
-                <a href="#" aria-label="Facebook"><i className="fab fa-facebook-f"></i></a>
-                <a href="#" aria-label="Twitter"><i className="fab fa-twitter"></i></a>
-                <a href="#" aria-label="Instagram"><i className="fab fa-instagram"></i></a>
-                <a href="#" aria-label="Pinterest"><i className="fab fa-pinterest"></i></a>
-              </div>
+              <h3 className="text-2xl font-bold">
+                Tienda<span className="text-indigo-400">Ecommerce</span>
+              </h3>
             </div>
+            <p className="text-gray-400 mb-6 leading-relaxed">
+              Plataforma de comercio electrónico premium que ofrece los mejores productos a precios competitivos.
+            </p>
+            <div className="flex gap-3">
+              {socialLinks.map((social, index) => (
+                <motion.a
+                  key={index}
+                  href={social.href}
+                  whileHover={{ scale: 1.2, rotate: 5 }}
+                  whileTap={{ scale: 0.9 }}
+                  className={`w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center transition-colors ${social.color}`}
+                  aria-label={`Social link ${index}`}
+                >
+                  <i className={social.icon}></i>
+                </motion.a>
+              ))}
+            </div>
+          </motion.div>
 
-            {/* Tienda */}
-            <div>
-              <h4 className="footer-title">Tienda</h4>
-              <ul className="footer-list">
-                <li><Link to="/products" className="footer-link" style={{ color: "#a0aec0", textDecoration: "none" }}>Todos los productos</Link></li>
-                <li><Link to="/featured" className="footer-link" style={{ color: "#a0aec0", textDecoration: "none" }}>Destacados</Link></li>
-                <li><Link to="/new-arrivals" className="footer-link" style={{ color: "#a0aec0", textDecoration: "none" }}>Novedades</Link></li>
-                <li><Link to="/sale" className="footer-link" style={{ color: "#a0aec0", textDecoration: "none" }}>En oferta</Link></li>
-                <li><Link to="/gift-cards" className="footer-link" style={{ color: "#a0aec0", textDecoration: "none" }}>Tarjetas de regalo</Link></li>
+          {/* Footer Sections */}
+          {footerSections.map((section, sectionIndex) => (
+            <motion.div
+              key={sectionIndex}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 + sectionIndex * 0.1 }}
+            >
+              <h4 className="text-lg font-bold mb-6 text-white">{section.title}</h4>
+              <ul className="space-y-3">
+                {section.links.map((link, linkIndex) => (
+                  <motion.li
+                    key={linkIndex}
+                    whileHover={{ x: 5 }}
+                  >
+                    <Link
+                      to={link.to}
+                      className="text-gray-400 hover:text-indigo-400 transition-colors flex items-center gap-2"
+                    >
+                      <i className="fas fa-chevron-right text-xs"></i>
+                      {link.label}
+                    </Link>
+                  </motion.li>
+                ))}
               </ul>
-            </div>
-
-            {/* Atención al Cliente */}
-            <div>
-              <h4 className="footer-title">Atención al Cliente</h4>
-              <ul className="footer-list">
-                <li><Link to="/contact" className="footer-link" style={{ color: "#a0aec0", textDecoration: "none" }}>Contáctanos</Link></li>
-                <li><Link to="/faq" className="footer-link" style={{ color: "#a0aec0", textDecoration: "none" }}>Preguntas frecuentes</Link></li>
-                <li><Link to="/shipping-policy" className="footer-link" style={{ color: "#a0aec0", textDecoration: "none" }}>Política de envíos</Link></li>
-                <li><Link to="/returns" className="footer-link" style={{ color: "#a0aec0", textDecoration: "none" }}>Devoluciones y reembolsos</Link></li>
-                <li><a href="#" className="footer-link" style={{ color: "#a0aec0", textDecoration: "none" }}>Rastrear pedido</a></li>
-              </ul>
-            </div>
-
-            {/* Acerca de */}
-            <div>
-              <h4 className="footer-title">Acerca de</h4>
-              <ul className="footer-list">
-                <li><Link to="/about" className="footer-link" style={{ color: "#a0aec0", textDecoration: "none" }}>Nuestra historia</Link></li>
-                <li><Link to="/careers" className="footer-link" style={{ color: "#a0aec0", textDecoration: "none" }}>Empleos</Link></li>
-                <li><Link to="/terms" className="footer-link" style={{ color: "#a0aec0", textDecoration: "none" }}>Términos y condiciones</Link></li>
-                <li><Link to="/privacy" className="footer-link" style={{ color: "#a0aec0", textDecoration: "none" }}>Política de privacidad</Link></li>
-                <li><Link to="/blog" className="footer-link" style={{ color: "#a0aec0", textDecoration: "none" }}>Blog</Link></li>
-              </ul>
-            </div>
-          </div>
-
+            </motion.div>
+          ))}
         </div>
 
-        <div className="footer-divider"></div>
-
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
-          <p className="footer-copy">
-            &copy; {new Date().getFullYear()} Tienda Ecommerce. Todos los derechos reservados.
-          </p>
+        {/* Divider */}
+        <div className="border-t border-gray-700 pt-8">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-gray-400 text-sm">
+              &copy; {new Date().getFullYear()} Tienda Ecommerce. Todos los derechos reservados.
+            </p>
+            <div className="flex items-center gap-6 text-gray-400 text-sm">
+              <Link to="/terms" className="hover:text-indigo-400 transition-colors">
+                Términos
+              </Link>
+              <Link to="/privacy" className="hover:text-indigo-400 transition-colors">
+                Privacidad
+              </Link>
+              <Link to="/cookies" className="hover:text-indigo-400 transition-colors">
+                Cookies
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </motion.footer>

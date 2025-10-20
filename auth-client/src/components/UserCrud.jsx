@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { getAllUsers, updateUserRole, deleteUser } from "../services/userService";
 
 export default function UserCrud() {
@@ -11,6 +12,7 @@ export default function UserCrud() {
   const [size, setSize] = useState(10);
   const [search, setSearch] = useState("");
 
+  // 📦 Obtener usuarios
   const fetchUsers = async (pageNum = 0) => {
     setLoading(true);
     setError(null);
@@ -20,24 +22,24 @@ export default function UserCrud() {
       let total = 1;
       let pageNumber = 0;
       let pageSize = size;
-      // Soporta respuesta paginada estándar de Spring Data
+
       if (Array.isArray(result.content)) {
         list = result.content;
-        total = typeof result.totalPages === "number" ? result.totalPages : 1;
-        pageNumber = typeof result.number === "number" ? result.number : 0;
-        pageSize = typeof result.size === "number" ? result.size : size;
+        total = result.totalPages ?? 1;
+        pageNumber = result.number ?? 0;
+        pageSize = result.size ?? size;
       } else if (result.items) {
         list = result.items;
         total = result.totalPages || 1;
         pageNumber = result.page ?? pageNum;
         pageSize = result.size || size;
       } else if (Array.isArray(result)) {
-        // fallback legacy
         list = result.slice(pageNum * size, pageNum * size + size);
         total = Math.ceil(result.length / size);
         pageNumber = pageNum;
         pageSize = size;
       }
+
       setUsers(list);
       setPage(pageNumber);
       setTotalPages(total);
@@ -54,6 +56,7 @@ export default function UserCrud() {
     // eslint-disable-next-line
   }, [page, size]);
 
+  // 🎭 Manejadores
   const handleRoleChange = (userId, newRole) => {
     setRoleUpdate((prev) => ({ ...prev, [userId]: newRole }));
   };
@@ -88,121 +91,198 @@ export default function UserCrud() {
     if (page < totalPages - 1) setPage(page + 1);
   };
 
-  // Filtrado por nombre de usuario solo para la tabla actual
   const filteredUsers = search
-    ? users.filter(user =>
+    ? users.filter((user) =>
         (user.username || "").toLowerCase().includes(search.toLowerCase())
       )
     : users;
 
-  if (loading) return <p className="text-center">Cargando usuarios...</p>;
-  if (error) return <p className="text-red-500 text-center">{error}</p>;
+  // 🌀 Estados de carga y error
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Cargando usuarios...</p>
+        </div>
+      </div>
+    );
+  }
 
+  if (error) {
+    return (
+      <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
+        <p className="text-red-700 font-medium">{error}</p>
+      </div>
+    );
+  }
+
+  // 🧱 Render principal
   return (
-    <div className="container mx-auto px-4 py-6">
-      <h2 className="text-2xl font-bold mb-6 text-indigo-700 flex items-center gap-2">
-        <i className="fas fa-users-cog text-indigo-400"></i>
-        Gestión de Usuarios
-      </h2>
-      <div className="mb-4 flex justify-end">
-        <div className="relative w-72">
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center shadow-lg">
+          <i className="fas fa-users-cog text-white text-xl"></i>
+        </div>
+        <h2 className="text-3xl font-bold text-gray-800">Gestión de Usuarios</h2>
+      </div>
+
+      <div className="mb-6 flex justify-end">
+        <div className="relative w-80">
           <input
             type="text"
             placeholder="🔍 Buscar por nombre..."
-            className="border border-indigo-300 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 px-4 py-2 pl-10 rounded-full shadow-sm w-full transition"
+            className="w-full px-4 py-3 pl-12 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={(e) => setSearch(e.target.value)}
           />
-          <span className="absolute left-3 top-2.5 text-indigo-400 pointer-events-none">
-            <i className="fas fa-search"></i>
-          </span>
+          <i className="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
         </div>
       </div>
-      <div className="bg-white shadow-md rounded-xl p-6">
+
+      <div className="bg-white shadow-lg rounded-2xl p-6 border border-gray-100">
         {filteredUsers.length === 0 ? (
-          <p>No hay usuarios registrados.</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm text-left">
-              <thead>
-                <tr className="bg-indigo-50">
-                  <th className="py-2 px-3 font-semibold">ID</th>
-                  <th className="py-2 px-3 font-semibold">Nombre</th>
-                  <th className="py-2 px-3 font-semibold">Email</th>
-                  <th className="py-2 px-3 font-semibold">Fecha Nacimiento</th>
-                  <th className="py-2 px-3 font-semibold">Teléfono</th>
-                  <th className="py-2 px-3 font-semibold">Rol</th>
-                  <th className="py-2 px-3 font-semibold">Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredUsers.map((user) => (
-                  <tr key={user.id} className="border-b">
-                    <td className="py-2 px-3">{user.id}</td>
-                    <td className="py-2 px-3">{user.username || user.nombre || '-'}</td>
-                    <td className="py-2 px-3">{user.email}</td>
-                    <td className="py-2 px-3">{user.fechaNacimiento || '-'}</td>
-                    <td className="py-2 px-3">{user.telefono || '-'}</td>
-                    <td className="py-2 px-3">
-                      <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700">
-                        {user.roleName || user.roles?.[0] || '-'}
-                      </span>
-                    </td>
-                    <td className="py-2 px-3 flex gap-2">
-                      <select
-                        className="border rounded px-2 py-1 mr-2"
-                        value={roleUpdate[user.id] || ""}
-                        onChange={e => handleRoleChange(user.id, e.target.value)}
-                      >
-                        <option value="">Cambiar rol</option>
-                        <option value="ROLE_USER">Usuario</option>
-                        <option value="ROLE_EMPLOYEE">Empleado</option>
-                        <option value="ROLE_ADMIN">Administrador</option>
-                      </select>
-                      <button
-                        className="px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition"
-                        onClick={() => handleUpdateRole(user.id)}
-                        disabled={!roleUpdate[user.id]}
-                      >
-                        Actualizar
-                      </button>
-                      <button
-                        className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition"
-                        onClick={() => handleDelete(user.id)}
-                      >
-                        Eliminar
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="text-center py-12 bg-gray-50 rounded-xl">
+            <i className="fas fa-users-slash text-gray-400 text-5xl mb-4"></i>
+            <p className="text-gray-600">No hay usuarios registrados.</p>
           </div>
+        ) : (
+          <>
+            <div className="overflow-x-auto">
+              <table className="min-w-full">
+                <thead>
+                  <tr className="bg-gradient-to-r from-purple-50 to-pink-50">
+                    <th className="py-4 px-6 text-left font-bold text-gray-700">
+                      <i className="fas fa-hashtag mr-2 text-purple-500"></i>ID
+                    </th>
+                    <th className="py-4 px-6 text-left font-bold text-gray-700">
+                      <i className="fas fa-user mr-2 text-purple-500"></i>Nombre
+                    </th>
+                    <th className="py-4 px-6 text-left font-bold text-gray-700">
+                      <i className="fas fa-envelope mr-2 text-purple-500"></i>Email
+                    </th>
+                    <th className="py-4 px-6 text-left font-bold text-gray-700">
+                      <i className="fas fa-calendar mr-2 text-purple-500"></i>Fecha Nacimiento
+                    </th>
+                    <th className="py-4 px-6 text-left font-bold text-gray-700">
+                      <i className="fas fa-phone mr-2 text-purple-500"></i>Teléfono
+                    </th>
+                    <th className="py-4 px-6 text-left font-bold text-gray-700">
+                      <i className="fas fa-shield-alt mr-2 text-purple-500"></i>Rol
+                    </th>
+                    <th className="py-4 px-6 text-left font-bold text-gray-700">
+                      <i className="fas fa-cog mr-2 text-purple-500"></i>Acciones
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <AnimatePresence>
+                    {filteredUsers.map((user, index) => (
+                      <motion.tr
+                        key={user.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 20 }}
+                        transition={{ delay: index * 0.05 }}
+                        className="border-b border-gray-100 hover:bg-purple-50/30 transition-colors"
+                      >
+                        <td className="py-4 px-6 font-bold text-purple-600">#{user.id}</td>
+                        <td className="py-4 px-6">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center text-white font-bold">
+                              {(user.username || user.nombre || "U").charAt(0).toUpperCase()}
+                            </div>
+                            <span className="font-semibold text-gray-800">
+                              {user.username || user.nombre || "-"}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="py-4 px-6 text-gray-700">{user.email}</td>
+                        <td className="py-4 px-6 text-gray-700">{user.fechaNacimiento || "-"}</td>
+                        <td className="py-4 px-6 text-gray-700">{user.telefono || "-"}</td>
+                        <td className="py-4 px-6">
+                          <span className="inline-block px-3 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-700">
+                            {user.roleName || user.roles?.[0] || "-"}
+                          </span>
+                        </td>
+                        <td className="py-4 px-6">
+                          <div className="flex gap-2">
+                            <select
+                              className="border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
+                              value={roleUpdate[user.id] || ""}
+                              onChange={(e) => handleRoleChange(user.id, e.target.value)}
+                            >
+                              <option value="">Cambiar rol</option>
+                              <option value="ROLE_USER">Usuario</option>
+                              <option value="ROLE_EMPLOYEE">Empleado</option>
+                              <option value="ROLE_ADMIN">Administrador</option>
+                            </select>
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              className="px-4 py-2 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                              onClick={() => handleUpdateRole(user.id)}
+                              disabled={!roleUpdate[user.id]}
+                            >
+                              <i className="fas fa-sync-alt"></i>
+                              Actualizar
+                            </motion.button>
+                            <motion.button
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
+                              className="w-9 h-9 bg-red-500 text-white rounded-lg hover:bg-red-600 transition flex items-center justify-center"
+                              onClick={() => handleDelete(user.id)}
+                            >
+                              <i className="fas fa-trash"></i>
+                            </motion.button>
+                          </div>
+                        </td>
+                      </motion.tr>
+                    ))}
+                  </AnimatePresence>
+                </tbody>
+              </table>
+            </div>
+
+            {/* Paginación */}
+            <div className="flex justify-center items-center gap-2 mt-8">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handlePrev}
+                disabled={page === 0}
+                className={`px-6 py-3 rounded-xl border-2 font-semibold transition-all flex items-center gap-2 ${
+                  page === 0
+                    ? "opacity-50 cursor-not-allowed border-gray-200 text-gray-400"
+                    : "border-purple-200 text-purple-600 hover:bg-purple-50"
+                }`}
+              >
+                <i className="fas fa-chevron-left"></i>
+                Anterior
+              </motion.button>
+
+              <span className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-xl font-bold shadow-lg">
+                {page + 1} / {totalPages}
+              </span>
+
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleNext}
+                disabled={page >= totalPages - 1}
+                className={`px-6 py-3 rounded-xl border-2 font-semibold transition-all flex items-center gap-2 ${
+                  page >= totalPages - 1
+                    ? "opacity-50 cursor-not-allowed border-gray-200 text-gray-400"
+                    : "border-purple-200 text-purple-600 hover:bg-purple-50"
+                }`}
+              >
+                Siguiente
+                <i className="fas fa-chevron-right"></i>
+              </motion.button>
+            </div>
+          </>
         )}
-        <div className="flex justify-center items-center gap-2 mt-8">
-          <button
-            onClick={handlePrev}
-            disabled={page === 0}
-            className={`px-4 py-2 rounded-l-lg border border-indigo-200 bg-white text-indigo-600 font-semibold transition
-              ${page === 0 ? "opacity-50 cursor-not-allowed" : "hover:bg-indigo-50 hover:text-indigo-800"}`}
-            aria-label="Anterior"
-          >
-            <i className="fas fa-chevron-left"></i> Anterior
-          </button>
-          <span className="px-4 py-2 bg-indigo-50 border-t border-b border-indigo-200 text-indigo-700 font-medium rounded-none select-none">
-            Página <span className="font-bold">{page + 1}</span> de <span className="font-bold">{totalPages}</span>
-          </span>
-          <button
-            onClick={handleNext}
-            disabled={page >= totalPages - 1}
-            className={`px-4 py-2 rounded-r-lg border border-indigo-200 bg-white text-indigo-600 font-semibold transition
-              ${page >= totalPages - 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-indigo-50 hover:text-indigo-800"}`}
-            aria-label="Siguiente"
-          >
-            Siguiente <i className="fas fa-chevron-right"></i>
-          </button>
-        </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

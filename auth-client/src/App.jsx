@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import {
   BrowserRouter,
   Routes,
@@ -35,9 +35,6 @@ import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 import Blog from './pages/Blog';
 
-//Ver profile
-
-
 function PrivateRoute({ requiredRole, children }) {
   const { token, userData } = useContext(AuthContext);
   if (!token) return <Navigate to="/login" replace />;
@@ -45,7 +42,6 @@ function PrivateRoute({ requiredRole, children }) {
     ? userData.roles
     : [userData?.roles];
 
-  // Permitir acceso a /admin tanto a ROLE_ADMIN como a ROLE_EMPLOYEE
   if (requiredRole === "ROLE_ADMIN") {
     if (roles.includes("ROLE_ADMIN") || roles.includes("ROLE_EMPLOYEE")) {
       return children;
@@ -53,18 +49,30 @@ function PrivateRoute({ requiredRole, children }) {
     return <Navigate to="/" replace />;
   }
 
-  // Acceso normal para otros roles
   return roles.includes(requiredRole) ? children : <Navigate to="/" replace />;
 }
 
 function Layout() {
   const location = useLocation();
   const hideHeaderFooter = location.pathname === '/';
+  const [searchQuery, setSearchQuery] = useState('');
+  
+  // Define qué rutas deben mostrar el buscador
+  const showSearchRoutes = ['/user', '/admin'];
+  const showSearch = showSearchRoutes.includes(location.pathname);
+  
   return (
     <>
-      {!hideHeaderFooter && <Header />}
+      {!hideHeaderFooter && (
+        <Header 
+          showSearch={showSearch}
+          onSearch={setSearchQuery}
+          title="Tienda"
+          subtitle="Encuentra todo lo que necesitas"
+        />
+      )}
       <main style={{ minHeight: 'calc(100vh - 160px)' }}>
-        <Outlet />
+        <Outlet context={{ searchQuery }} />
       </main>
       {!hideHeaderFooter && <Footer />}
     </>

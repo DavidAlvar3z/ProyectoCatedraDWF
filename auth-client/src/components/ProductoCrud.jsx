@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { getAllProductosPaged, createProducto, updateProducto, deleteProducto } from "../services/productoService";
 import { AuthContext } from "../context/AuthContext";
 
@@ -17,13 +18,11 @@ export default function ProductoCrud() {
   const roles = Array.isArray(userData?.roles) ? userData.roles : [userData?.roles];
   const isAdmin = roles.includes("ROLE_ADMIN");
 
-  // --- Lógica de paginación igual a PedidoCrud ---
   const fetchProductos = async (pageNum = 0) => {
     setLoading(true);
     setError(null);
     try {
       const result = await getAllProductosPaged(pageNum, size);
-      // result: { items, page, size, totalPages, totalElements }
       setProductos(result.items || []);
       setPage(result.page ?? 0);
       setTotalPages(result.totalPages ?? 1);
@@ -70,144 +69,245 @@ export default function ProductoCrud() {
     if (page < totalPages - 1) setPage(page + 1);
   };
 
-  // Filtrado solo para la tabla actual
   const filtered = search
     ? productos.filter(p =>
         (p.nombre || "").toLowerCase().includes(search.toLowerCase())
       )
     : productos;
 
-  if (loading) return <p className="text-center">Cargando productos...</p>;
-  if (error)   return <p className="text-center text-red-500">{error}</p>;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Cargando productos...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
+        <p className="text-red-700 font-medium">{error}</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="container mx-auto px-4 py-6">
-      <h2 className="text-2xl font-bold mb-6 text-indigo-700 flex items-center gap-2">
-        <i className="fas fa-boxes text-indigo-400"></i>
-        Gestión de Productos
-      </h2>
-      {isAdmin && (
-        <div className="mb-6 flex justify-between items-center">
-          <span className="text-lg font-medium text-gray-700">
-            Agrega nuevos productos al catálogo
-          </span>
-          <button
-            className="flex items-center gap-2 px-5 py-2 bg-indigo-600 text-white rounded-full font-semibold shadow hover:bg-indigo-700 transition focus:outline-none focus:ring-2 focus:ring-indigo-400"
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+    >
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg">
+            <i className="fas fa-boxes text-white text-xl"></i>
+          </div>
+          <h2 className="text-3xl font-bold text-gray-800">Gestión de Productos</h2>
+        </div>
+        {isAdmin && (
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="px-6 py-3 bg-gradient-to-r from-green-500 to-teal-600 text-white rounded-xl font-bold shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2"
             onClick={handleAdd}
           >
             <i className="fas fa-plus"></i>
             Agregar Producto
-          </button>
-        </div>
-      )}
-      <div className="mb-4 flex justify-end">
-        <input
-          type="text"
-          placeholder="🔍 Buscar producto..."
-          className="border px-4 py-2 rounded-full w-64"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
-      </div>
-      <div className="bg-white shadow-md rounded-xl p-6">
-        {filtered.length === 0 ? (
-          <p>No hay productos registrados.</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm text-left">
-              <thead>
-                <tr className="bg-indigo-50">
-                  <th className="py-2 px-3 font-semibold">ID</th>
-                  <th className="py-2 px-3 font-semibold">Nombre</th>
-                  <th className="py-2 px-3 font-semibold">Descripción</th>
-                  <th className="py-2 px-3 font-semibold">Precio</th>
-                  <th className="py-2 px-3 font-semibold">Costo</th>
-                  <th className="py-2 px-3 font-semibold">Stock</th>
-                  <th className="py-2 px-3 font-semibold">Imagen</th>
-                  <th className="py-2 px-3 font-semibold">Puntos</th>
-                  <th className="py-2 px-3 font-semibold">Tipo</th>
-                  <th className="py-2 px-3 font-semibold">Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((producto) => (
-                  <tr key={producto.idProducto} className="border-b">
-                    <td className="py-2 px-3">{producto.idProducto}</td>
-                    <td className="py-2 px-3">{producto.nombre}</td>
-                    <td className="py-2 px-3">{producto.descripcion}</td>
-                    <td className="py-2 px-3">${producto.precio}</td>
-                    <td className="py-2 px-3">${producto.costo}</td>
-                    <td className="py-2 px-3">{producto.cantidad}</td>
-                    <td className="py-2 px-3">
-                      {producto.imagen && (
-                        <img src={producto.imagen} alt={producto.nombre} className="w-12 h-12 object-cover rounded" />
-                      )}
-                    </td>
-                    <td className="py-2 px-3">{producto.cantidadPuntos}</td>
-                    <td className="py-2 px-3">{producto.nombreTipo || producto.tipoProducto?.nombre || '-'}</td>
-                    <td className="py-2 px-3 flex gap-2">
-                      <button
-                        className="px-3 py-1 bg-yellow-400 text-white rounded hover:bg-yellow-500 transition"
-                        onClick={() => handleEdit(producto)}
-                        disabled={!isAdmin}
-                        title={isAdmin ? "Editar producto" : "Solo el administrador puede editar"}
-                      >
-                        Editar
-                      </button>
-                      <button
-                        className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition"
-                        onClick={() => handleDelete(producto.idProducto)}
-                        disabled={!isAdmin}
-                        title={isAdmin ? "Eliminar producto" : "Solo el administrador puede eliminar"}
-                      >
-                        Eliminar
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          </motion.button>
         )}
-        <div className="flex justify-center items-center gap-2 mt-8">
-          <button
-            onClick={handlePrev}
-            disabled={page === 0}
-            className={`px-4 py-2 rounded-l-lg border border-indigo-200 bg-white text-indigo-600 font-semibold transition
-              ${page === 0 ? "opacity-50 cursor-not-allowed" : "hover:bg-indigo-50 hover:text-indigo-800"}`}
-            aria-label="Anterior"
-          >
-            <i className="fas fa-chevron-left"></i> Anterior
-          </button>
-          <span className="px-4 py-2 bg-indigo-50 border-t border-b border-indigo-200 text-indigo-700 font-medium rounded-none select-none">
-            Página <span className="font-bold">{page + 1}</span> de <span className="font-bold">{totalPages}</span>
-          </span>
-          <button
-            onClick={handleNext}
-            disabled={page >= totalPages - 1}
-            className={`px-4 py-2 rounded-r-lg border border-indigo-200 bg-white text-indigo-600 font-semibold transition
-              ${page >= totalPages - 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-indigo-50 hover:text-indigo-800"}`}
-            aria-label="Siguiente"
-          >
-            Siguiente <i className="fas fa-chevron-right"></i>
-          </button>
+      </div>
+
+      <div className="mb-6 flex justify-end">
+        <div className="relative w-80">
+          <input
+            type="text"
+            placeholder="🔍 Buscar producto..."
+            className="w-full px-4 py-3 pl-12 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+          <i className="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
         </div>
       </div>
-      {/* Modal de creación/edición */}
-      {modalOpen && isAdmin && (
-        <ProductoModal
-          producto={editProducto}
-          onClose={() => setModalOpen(false)}
-          onSave={async prod => {
-            if (prod.idProducto) await updateProducto(prod.idProducto, prod);
-            else              await createProducto(prod);
-            setModalOpen(false);
-            fetchProductos(page);
-          }}
-          tiposProducto={[]} // Si tienes tipos, pásalos aquí
-        />
-      )}
-    </div>
+
+      <div className="bg-white shadow-lg rounded-2xl p-6 border border-gray-100">
+        {filtered.length === 0 ? (
+          <div className="text-center py-12 bg-gray-50 rounded-xl">
+            <i className="fas fa-box-open text-gray-400 text-5xl mb-4"></i>
+            <p className="text-gray-600">No hay productos registrados.</p>
+          </div>
+        ) : (
+          <>
+            <div className="overflow-x-auto">
+              <table className="min-w-full">
+                <thead>
+                  <tr className="bg-gradient-to-r from-green-50 to-teal-50">
+                    <th className="py-4 px-6 text-left font-bold text-gray-700">
+                      <i className="fas fa-hashtag mr-2 text-green-500"></i>ID
+                    </th>
+                    <th className="py-4 px-6 text-left font-bold text-gray-700">
+                      <i className="fas fa-tag mr-2 text-green-500"></i>Nombre
+                    </th>
+                    <th className="py-4 px-6 text-left font-bold text-gray-700">
+                      <i className="fas fa-align-left mr-2 text-green-500"></i>Descripción
+                    </th>
+                    <th className="py-4 px-6 text-left font-bold text-gray-700">
+                      <i className="fas fa-dollar-sign mr-2 text-green-500"></i>Precio
+                    </th>
+                    <th className="py-4 px-6 text-left font-bold text-gray-700">
+                      <i className="fas fa-money-bill mr-2 text-green-500"></i>Costo
+                    </th>
+                    <th className="py-4 px-6 text-left font-bold text-gray-700">
+                      <i className="fas fa-warehouse mr-2 text-green-500"></i>Stock
+                    </th>
+                    <th className="py-4 px-6 text-left font-bold text-gray-700">
+                      <i className="fas fa-image mr-2 text-green-500"></i>Imagen
+                    </th>
+                    <th className="py-4 px-6 text-left font-bold text-gray-700">
+                      <i className="fas fa-star mr-2 text-green-500"></i>Puntos
+                    </th>
+                    <th className="py-4 px-6 text-left font-bold text-gray-700">
+                      <i className="fas fa-layer-group mr-2 text-green-500"></i>Tipo
+                    </th>
+                    <th className="py-4 px-6 text-left font-bold text-gray-700">
+                      <i className="fas fa-cog mr-2 text-green-500"></i>Acciones
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <AnimatePresence>
+                    {filtered.map((producto, index) => (
+                      <motion.tr
+                        key={producto.idProducto}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 20 }}
+                        transition={{ delay: index * 0.05 }}
+                        className="border-b border-gray-100 hover:bg-green-50/30 transition-colors"
+                      >
+                        <td className="py-4 px-6 font-bold text-green-600">#{producto.idProducto}</td>
+                        <td className="py-4 px-6 font-semibold text-gray-800">{producto.nombre}</td>
+                        <td className="py-4 px-6 text-gray-600 max-w-xs truncate">{producto.descripcion}</td>
+                        <td className="py-4 px-6">
+                          <span className="text-lg font-bold text-green-600">${producto.precio}</span>
+                        </td>
+                        <td className="py-4 px-6 text-gray-700">${producto.costo}</td>
+                        <td className="py-4 px-6">
+                          <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                            producto.cantidad > 10 
+                              ? 'bg-green-100 text-green-800' 
+                              : 'bg-red-100 text-red-800'
+                          }`}>
+                            {producto.cantidad}
+                          </span>
+                        </td>
+                        <td className="py-4 px-6">
+                          {producto.imagen && (
+                            <img 
+                              src={producto.imagen} 
+                              alt={producto.nombre} 
+                              className="w-16 h-16 object-cover rounded-lg shadow-md" 
+                            />
+                          )}
+                        </td>
+                        <td className="py-4 px-6">
+                          <span className="flex items-center gap-1 text-yellow-600 font-semibold">
+                            <i className="fas fa-star"></i>
+                            {producto.cantidadPuntos}
+                          </span>
+                        </td>
+                        <td className="py-4 px-6">
+                          <span className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-semibold">
+                            {producto.nombreTipo || producto.tipoProducto?.nombre || '-'}
+                          </span>
+                        </td>
+                        <td className="py-4 px-6">
+                          <div className="flex gap-2">
+                            <motion.button
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
+                              className="w-9 h-9 bg-yellow-400 text-white rounded-lg hover:bg-yellow-500 transition flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                              onClick={() => handleEdit(producto)}
+                              disabled={!isAdmin}
+                              title={isAdmin ? "Editar producto" : "Solo el administrador puede editar"}
+                            >
+                              <i className="fas fa-edit"></i>
+                            </motion.button>
+                            <motion.button
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
+                              className="w-9 h-9 bg-red-500 text-white rounded-lg hover:bg-red-600 transition flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                              onClick={() => handleDelete(producto.idProducto)}
+                              disabled={!isAdmin}
+                              title={isAdmin ? "Eliminar producto" : "Solo el administrador puede eliminar"}
+                            >
+                              <i className="fas fa-trash"></i>
+                            </motion.button>
+                          </div>
+                        </td>
+                      </motion.tr>
+                    ))}
+                  </AnimatePresence>
+                </tbody>
+              </table>
+            </div>
+
+            <div className="flex justify-center items-center gap-2 mt-8">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handlePrev}
+                disabled={page === 0}
+                className={`px-6 py-3 rounded-xl border-2 font-semibold transition-all flex items-center gap-2 ${
+                  page === 0
+                    ? "opacity-50 cursor-not-allowed border-gray-200 text-gray-400"
+                    : "border-green-200 text-green-600 hover:bg-green-50"
+                }`}
+              >
+                <i className="fas fa-chevron-left"></i>
+                Anterior
+              </motion.button>
+              <span className="px-6 py-3 bg-gradient-to-r from-green-500 to-teal-600 text-white rounded-xl font-bold shadow-lg">
+                {page + 1} / {totalPages}
+              </span>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleNext}
+                disabled={page >= totalPages - 1}
+                className={`px-6 py-3 rounded-xl border-2 font-semibold transition-all flex items-center gap-2 ${
+                  page >= totalPages - 1
+                    ? "opacity-50 cursor-not-allowed border-gray-200 text-gray-400"
+                    : "border-green-200 text-green-600 hover:bg-green-50"
+                }`}
+              >
+                Siguiente
+                <i className="fas fa-chevron-right"></i>
+              </motion.button>
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* Modal */}
+      <AnimatePresence>
+        {modalOpen && isAdmin && (
+          <ProductoModal
+            producto={editProducto}
+            onClose={() => setModalOpen(false)}
+            onSave={async prod => {
+              if (prod.idProducto) await updateProducto(prod.idProducto, prod);
+              else await createProducto(prod);
+              setModalOpen(false);
+              fetchProductos(page);
+            }}
+            tiposProducto={[]}
+          />
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }
 
@@ -239,97 +339,149 @@ function ProductoModal({ producto, onClose, onSave, tiposProducto }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-lg">
-        <h3 className="text-xl font-bold mb-4">{form.idProducto ? "Editar Producto" : "Nuevo Producto"}</h3>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.9, y: 20 }}
+        animate={{ scale: 1, y: 0 }}
+        exit={{ scale: 0.9, y: 20 }}
+        className="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-teal-600 rounded-xl flex items-center justify-center">
+              <i className={`fas ${form.idProducto ? 'fa-edit' : 'fa-plus'} text-white text-xl`}></i>
+            </div>
+            <h3 className="text-2xl font-bold text-gray-800">
+              {form.idProducto ? "Editar Producto" : "Nuevo Producto"}
+            </h3>
+          </div>
+          <motion.button
+            whileHover={{ scale: 1.1, rotate: 90 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={onClose}
+            className="w-10 h-10 bg-gray-100 hover:bg-red-100 text-gray-600 hover:text-red-600 rounded-full flex items-center justify-center transition-colors"
+          >
+            <i className="fas fa-times"></i>
+          </motion.button>
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Nombre</label>
+            <label className="block text-sm font-semibold mb-2 text-gray-700">
+              <i className="fas fa-tag mr-2 text-green-500"></i>Nombre
+            </label>
             <input
               name="nombre"
               value={form.nombre}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-indigo-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
               required
             />
           </div>
+
           <div>
-            <label className="block text-sm font-medium mb-1">Descripción</label>
+            <label className="block text-sm font-semibold mb-2 text-gray-700">
+              <i className="fas fa-align-left mr-2 text-green-500"></i>Descripción
+            </label>
             <textarea
               name="descripcion"
               value={form.descripcion}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-indigo-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
-              rows={2}
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 transition-all resize-none"
+              rows={3}
               maxLength={500}
             />
           </div>
-          <div className="flex gap-2">
-            <div className="flex-1">
-              <label className="block text-sm font-medium mb-1">Precio</label>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-semibold mb-2 text-gray-700">
+                <i className="fas fa-dollar-sign mr-2 text-green-500"></i>Precio
+              </label>
               <input
                 name="precio"
                 type="number"
                 step="0.01"
                 value={form.precio}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-indigo-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
                 required
               />
             </div>
-            <div className="flex-1">
-              <label className="block text-sm font-medium mb-1">Costo</label>
+            <div>
+              <label className="block text-sm font-semibold mb-2 text-gray-700">
+                <i className="fas fa-money-bill mr-2 text-green-500"></i>Costo
+              </label>
               <input
                 name="costo"
                 type="number"
                 step="0.01"
                 value={form.costo}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-indigo-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
                 required
               />
             </div>
           </div>
-          <div className="flex gap-2">
-            <div className="flex-1">
-              <label className="block text-sm font-medium mb-1">Stock</label>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-semibold mb-2 text-gray-700">
+                <i className="fas fa-warehouse mr-2 text-green-500"></i>Stock
+              </label>
               <input
                 name="cantidad"
                 type="number"
                 value={form.cantidad}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-indigo-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
                 required
               />
             </div>
-            <div className="flex-1">
-              <label className="block text-sm font-medium mb-1">Puntos</label>
+            <div>
+              <label className="block text-sm font-semibold mb-2 text-gray-700">
+                <i className="fas fa-star mr-2 text-yellow-500"></i>Puntos
+              </label>
               <input
                 name="cantidadPuntos"
                 type="number"
                 value={form.cantidadPuntos}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-indigo-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
                 required
               />
             </div>
           </div>
+
           <div>
-            <label className="block text-sm font-medium mb-1">Imagen (URL)</label>
+            <label className="block text-sm font-semibold mb-2 text-gray-700">
+              <i className="fas fa-image mr-2 text-green-500"></i>Imagen (URL)
+            </label>
             <input
               name="imagen"
               value={form.imagen}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-indigo-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
+              placeholder="https://..."
             />
           </div>
+
           <div>
-            <label className="block text-sm font-medium mb-1">Tipo de Producto</label>
+            <label className="block text-sm font-semibold mb-2 text-gray-700">
+              <i className="fas fa-layer-group mr-2 text-green-500"></i>Tipo de Producto
+            </label>
             <select
               name="idTipoProducto"
               value={form.idTipoProducto}
               onChange={handleTipoChange}
-              className="w-full px-3 py-2 border border-indigo-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
               required
             >
               <option value="">Selecciona un tipo</option>
@@ -340,23 +492,29 @@ function ProductoModal({ producto, onClose, onSave, tiposProducto }) {
               ))}
             </select>
           </div>
-          <div className="flex justify-end gap-2 mt-4">
-            <button
+
+          <div className="flex justify-end gap-3 pt-4">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               type="button"
-              className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition"
+              className="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-300 transition"
               onClick={onClose}
             >
               Cancelar
-            </button>
-            <button
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               type="submit"
-              className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition"
+              className="px-6 py-3 bg-gradient-to-r from-green-500 to-teal-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition"
             >
+              <i className="fas fa-save mr-2"></i>
               Guardar
-            </button>
+            </motion.button>
           </div>
         </form>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
